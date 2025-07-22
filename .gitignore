@@ -1,0 +1,21 @@
+# Virtual Environment
+venv/
+youbike_env/
+youbike_env_fresh/
+
+# Python cache
+__pycache__/
+*.pyc
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local AWS credentials
+.aws/
+
+# Large data files or model artifacts
+*.zip
+*.parquet
+*.csv
+*.joblib
