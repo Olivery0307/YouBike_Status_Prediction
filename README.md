@@ -42,8 +42,7 @@ To explore the data preparation and model training process:
     source venv/bin/activate
 
     # Install required packages
-    pip install -r notebooks/requirements.txt 
-    # Note: You may need a separate requirements file for the notebooks
+    pip install -r notebooks/requirements.txt
     ```
 
 2.  **Launch Jupyter and run the notebooks:**
