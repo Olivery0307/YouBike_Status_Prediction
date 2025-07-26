@@ -7,7 +7,7 @@ youbike_env_fresh/
 __pycache__/
 *.pyc
 .DS_Store
-.virtual_documents/
+.virtual_documents/notebooks
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
