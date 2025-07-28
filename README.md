@@ -1,21 +1,31 @@
 # YouBike Station Availability Prediction
 
-This project builds and deploys an end-to-end machine learning system to predict the short-term availability status (e.g., `EMPTY`, `FULL`, `LOW`) of YouBike stations across Taipei.
+This project is an end-to-end machine learning system that collects real-time data, trains a model, and deploys a live service to predict the short-term availability status of YouBike stations in Taipei.
 
 ---
 
-### Current Status (as of July 2025)
+## 🚀 Live Demo
 
-The project is fully operational with both data collection and prediction pipelines deployed on AWS.
+A live dashboard is deployed to visualize the model's predictions for the next 15 minutes. The data is updated automatically every 15 minutes by the production pipeline.
+
+**[➡️ View the Live Dashboard Here](https://olivery0307.github.io/YouBike_Status_Prediction/dashboard.html)**
+
+
+![Project Showcase](assets/project_showcase.png)
+
+---
+
+### Project Summary
+
+This project demonstrates a full MLOps lifecycle proof-of-concept, from data ingestion and model training to a fully automated, containerized deployment on AWS.
 
 * **Data Pipeline:** A serverless AWS Lambda function collects real-time station data every 5 minutes and stores it in S3.
 * **Prediction Pipeline:** A Dockerized AWS Lambda function loads a trained model and generates live predictions every 15 minutes.
 * **Model Performance:** The trained `LightGBM` model is highly effective at identifying critical states 15 minutes in advance, achieving **90% recall** for `FULL` stations and **77% recall** for `EMPTY` stations.
-* **Next Step:** **Phase 5: Visualization & Insights**, where we will build a dashboard to monitor the live predictions.
 
 ---
 
-### Project Architecture
+### Architecture
 
 #### 1. Data Collection Pipeline
 * **Amazon EventBridge:** Triggers the process every 5 minutes.
@@ -27,6 +37,16 @@ The project is fully operational with both data collection and prediction pipeli
 * **Amazon EventBridge:** Triggers the pipeline every 15 minutes.
 * **AWS Lambda:** A function configured to run from the Docker container image executes the prediction logic.
 * **Amazon S3:** The trained model artifact (`.joblib` file) is stored here, and the final predictions are saved as `.csv` and `.json` files.
+
+---
+
+### Next Steps
+
+The data collection and prediction pipelines are currently running continuously. The immediate next steps are:
+
+1.  **Model Monitoring:** Continue collecting data for a longer period (e.g., three months) to capture more diverse usage patterns (seasonal changes, holidays, weather events).
+2.  **Performance Evaluation:** Regularly evaluate the live model's predictions against the actual outcomes to monitor for performance degradation or "model drift."
+3.  **Automated Retraining (CI/CD):** Based on the evaluation, design and implement a CI/CD pipeline (e.g., using AWS SageMaker or GitHub Actions) to automate the process of retraining, evaluating, and deploying new versions of the model.
 
 ---
 
@@ -42,7 +62,7 @@ To explore the data preparation and model training process:
     source venv/bin/activate
 
     # Install required packages
-    pip install -r notebooks/requirements.txt
+    pip install -r requirements.txt
     ```
 
 2.  **Launch Jupyter and run the notebooks:**
@@ -63,6 +83,3 @@ The prediction service is a self-contained Docker application.
     ```bash
     docker build -t youbike-prediction-service .
     ```
-    (Refer to the project documentation for instructions on pushing to ECR and deploying to AWS Lambda.)
-
----

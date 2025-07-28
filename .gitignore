@@ -1,7 +1,7 @@
 # Virtual Environment
 venv/
 youbike_env/
-youbike_env_fresh/
+youbike_env_deploy/
 
 # Python cache
 __pycache__/

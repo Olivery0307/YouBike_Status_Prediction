@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouBike Live Prediction Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #map { height: 60vh; }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">YouBike Station Status Dashboard</h1>
+            <p class="text-lg text-gray-600 mt-2">Live predictions for the next 15 minutes</p>
+            <p id="last-updated" class="text-sm text-gray-500 mt-1">Updating...</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Station Map</h2>
+                <div id="map" class="rounded-md z-0"></div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-semibold mb-4">Prediction Summary</h2>
+                <canvas id="predictionChart"></canvas>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-8 text-gray-500">
+            <p>YouBike Prediction Project by Chung-Yeh Yang</p>
+        </footer>
+    </div>
+
+    <script>
+        const dataUrl = 'https://chung-yeh-youbike-poc-data.s3.ap-northeast-1.amazonaws.com/predictions/latest_predictions.json';
+
+        const statusColors = {
+            'HEALTHY': '#22c55e', // green-500
+            'LOW': '#f59e0b',     // amber-500
+            'EMPTY': '#ef4444',   // red-500
+            'FULL': '#3b82f6'     // blue-500
+        };
+
+        async function fetchDataAndRender() {
+            try {
+                const response = await fetch(dataUrl + `?t=${new Date().getTime()}`); // Cache-busting
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                const lastUpdated = new Date(data[0].collection_timestamp).toLocaleString('en-US', { timeZone: 'Asia/Taipei' });
+                document.getElementById('last-updated').textContent = `Last Updated (Taipei Time): ${lastUpdated}`;
+
+                renderMap(data);
+                renderChart(data);
+
+            } catch (error) {
+                console.error("Failed to fetch or render data:", error);
+                document.getElementById('last-updated').textContent = 'Error loading data. Please check the S3 URL and permissions.';
+            }
+        }
+
+        function renderMap(data) {
+            // Clear previous map instance if it exists
+            const mapContainer = document.getElementById('map');
+            if (mapContainer._leaflet_id) {
+                mapContainer._leaflet_id = null;
+            }
+            
+            const map = L.map('map').setView([25.0330, 121.5654], 13); // Centered on Taipei
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            data.forEach(station => {
+                const color = statusColors[station.predicted_status] || '#6b7280'; // gray-500 for unknown
+                const circleMarker = L.circleMarker([station.latitude, station.longitude], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#1f2937', // gray-800
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                circleMarker.bindPopup(`
+                    <strong class="text-lg">${station.sna.replace('YouBike2.0_', '')}</strong><br>
+                    Predicted Status: <span style="color: ${color}; font-weight: bold;">${station.predicted_status}</span><br>
+                    Station ID: ${station.sno}
+                `);
+            });
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            
+            const counts = data.reduce((acc, station) => {
+                acc[station.predicted_status] = (acc[station.predicted_status] || 0) + 1;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(counts).sort();
+            const chartData = labels.map(label => counts[label]);
+            const backgroundColors = labels.map(label => statusColors[label] || '#6b7280');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '# of Stations',
+                        data: chartData,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(c => c + 'B3'), // Add some opacity for border
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial load and set interval to refresh every 5 minutes
+        fetchDataAndRender();
+        setInterval(fetchDataAndRender, 5 * 60 * 1000); 
+
+    </script>
+
+</body>
+</html>
