@@ -8,7 +8,7 @@ This project is an end-to-end machine learning system that collects real-time da
 
 A live dashboard is deployed to visualize the model's predictions for the next 15 minutes. The data is updated automatically every 15 minutes by the production pipeline.
 
-**[➡️ View the Live Dashboard Here](https://olivery0307.github.io/YouBike_Status_Prediction/dashboard.html)**
+**[➡️ View the Live Dashboard Here](https://olivery0307.github.io/YouBike_Status_Prediction/)**
 
 
 ![Project Showcase](assets/project_showcase.png)
