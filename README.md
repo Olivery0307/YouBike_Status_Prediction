@@ -1,6 +1,10 @@
 # YouBike Station Availability Prediction
 
-This project is an end-to-end machine learning system that collects real-time data, trains a model, and deploys a live service to predict the short-term availability status of YouBike stations in Taipei.
+### Introduction
+
+As a frequent YouBike user in Taipei, I sometimes found myself frustrated by the limitations of the official app. It shows the real-time availability of bikes, but it can't predict the near future. More than once, I'd spot a station with one or two bikes available, only to walk there and find them already gone. This gap between real-time data and future reality is the problem this project aims to solve.
+
+By leveraging the official [YouBike API](https://data.taipei/dataset/detail?id=c6bc8aed-557d-41d5-bfb1-8da24f78f2fb), this project builds an end-to-end machine learning system to forecast station availability 15 minutes into the future. The goal is to provide a more reliable picture of which stations are at risk of becoming `EMPTY` (no bikes) or `FULL` (no docks), helping users make better decisions and improving the overall YouBike experience.
 
 ---
 
